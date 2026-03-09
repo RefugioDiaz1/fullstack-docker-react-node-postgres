@@ -1,0 +1,52 @@
+services:
+  frontend:
+    build: 
+      context: ./client/
+      args:
+        VITE_API_URL: http://localhost:3005
+    container_name: frontNode
+    restart: unless-stopped
+    ports: 
+      - "1254:80"
+    networks:
+      - public-netFront
+    depends_on:
+      - backend
+  backend: 
+    build: ./server/
+    container_name: backNode
+    restart: unless-stopped
+    ports: 
+      - "3005:3750"
+    environment: 
+      - DATABASE_URL=postgresql://admin:admin123@postgres:5432/rest_api_node_typescript_injv
+      - FRONTEND_URL=http://localhost:1254
+      - PORT=3750
+    networks:
+      - public-netFront
+      - private-netBD
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:16-alpine
+    container_name: BDPostgres
+    restart: unless-stopped
+    ports: 
+      - "5440:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_DB=rest_api_node_typescript_injv  # ← falta esto
+    volumes:
+      - ./volumeData:/var/lib/postgresql/data
+    networks:
+      - private-netBD
+
+networks:
+  public-netFront:
+  private-netBD:
+
+#volumes: 
+#  postgres_data:
+
+
